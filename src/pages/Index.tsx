@@ -15,35 +15,24 @@ const Index = () => {
   const [duration, setDuration] = useState(180);
   const [stemSeparation, setStemSeparation] = useState(false);
 
-  const eraOptions = ['2020s', '2010s', '1990s', '1980s', '2000s'];
-  const genreOptions = ['pop', 'rap', 'afrobeats', 'rock', 'jazz', 'electronic', 'hip-hop', 'r&b'];
-  const moodOptions = ['energetic', 'melancholic', 'romantic', 'chill', 'intense', 'uplifting'];
-  const instrumentOptions = ['guitar', 'piano', 'drums', 'strings', 'synth', 'bass'];
-  const vocalOptions = ['male vocalist', 'female vocalist', 'instrumental', 'duo'];
+  const allTags = [
+    // Era
+    { category: 'Era', tags: ['2020s', '2010s', '1990s', '1980s', '2000s'] },
+    // Genre
+    { category: 'Genre', tags: ['pop', 'rap', 'afrobeats', 'rock', 'jazz', 'electronic', 'hip-hop', 'r&b', 'indie', 'country', 'reggae', 'soul'] },
+    // Mood
+    { category: 'Mood', tags: ['energetic', 'melancholic', 'romantic', 'chill', 'intense', 'uplifting', 'dark', 'playful'] },
+    // Instruments
+    { category: 'Instruments', tags: ['guitar', 'piano', 'drums', 'strings', 'synth', 'bass', 'flute', 'violin'] },
+    // Vocal
+    { category: 'Vocal', tags: ['male vocalist', 'female vocalist', 'instrumental', 'duo', 'choir'] }
+  ];
 
   const toggleTag = (tag: string) => {
     setSelectedTags(prev => 
       prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
     );
   };
-
-  const TagGroup = ({ title, options }: { title: string; options: string[] }) => (
-    <div className="space-y-3">
-      <h3 className="text-sm font-semibold text-foreground">{title}</h3>
-      <div className="flex flex-wrap gap-2">
-        {options.map(option => (
-          <Badge
-            key={option}
-            variant={selectedTags.includes(option) ? 'default' : 'outline'}
-            className="cursor-pointer hover:scale-105 transition-transform"
-            onClick={() => toggleTag(option)}
-          >
-            {option}
-          </Badge>
-        ))}
-      </div>
-    </div>
-  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">
@@ -52,7 +41,7 @@ const Index = () => {
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-3 mb-4">
             <Music className="w-8 h-8 text-accent" />
-            <h1 className="text-4xl md:text-5xl font-bold text-foreground">AI Music Generator</h1>
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground">Hwiriko Visual Setter</h1>
           </div>
           <p className="text-muted-foreground text-lg">Create unique music with AI in seconds</p>
         </div>
@@ -112,11 +101,26 @@ const Index = () => {
             <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
               <Music className="w-5 h-5" /> Style Tags
             </h2>
-            <TagGroup title="Era" options={eraOptions} />
-            <TagGroup title="Genre" options={genreOptions} />
-            <TagGroup title="Mood" options={moodOptions} />
-            <TagGroup title="Instruments" options={instrumentOptions} />
-            <TagGroup title="Vocal" options={vocalOptions} />
+            
+            <div className="space-y-4">
+              {allTags.map((group) => (
+                <div key={group.category} className="space-y-2">
+                  <h3 className="text-xs font-bold uppercase text-muted-foreground tracking-wider">{group.category}</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {group.tags.map(tag => (
+                      <Badge
+                        key={tag}
+                        variant={selectedTags.includes(tag) ? 'default' : 'outline'}
+                        className="cursor-pointer hover:scale-105 transition-transform"
+                        onClick={() => toggleTag(tag)}
+                      >
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
             
             {selectedTags.length > 0 && (
               <div className="bg-secondary/10 border border-secondary rounded-lg p-4">
