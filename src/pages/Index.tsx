@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Music, Upload, Zap, Sliders } from 'lucide-react';
+import { Music, Upload, Zap, Sliders, Loader } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +14,8 @@ const Index = () => {
   const [bpm, setBpm] = useState(120);
   const [duration, setDuration] = useState(180);
   const [stemSeparation, setStemSeparation] = useState(false);
+  const [hint, setHint] = useState('');
+  const [generatingLyrics, setGeneratingLyrics] = useState(false);
 
   const allTags = [
     // Era
@@ -32,6 +34,33 @@ const Index = () => {
     setSelectedTags(prev => 
       prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
     );
+  };
+
+  const generateLyricsAI = async () => {
+    if (!hint.trim()) return;
+    
+    setGeneratingLyrics(true);
+    try {
+      // Call AI lyrics generation edge function
+      const response = await fetch('/api/generate-lyrics', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          hint,
+          tags: selectedTags,
+          genre: selectedTags.find(t => ['pop', 'rap', 'rock', 'jazz', 'electronic', 'afrobeats'].includes(t)) || 'pop',
+          mood: selectedTags.find(t => ['energetic', 'melancholic', 'romantic', 'chill', 'intense'].includes(t)) || 'energetic'
+        })
+      });
+      
+      const data = await response.json();
+      setLyrics(data.lyrics || '');
+      setInputMode('lyrics');
+    } catch (error) {
+      console.error('Failed to generate lyrics:', error);
+    } finally {
+      setGeneratingLyrics(false);
+    }
   };
 
   return (
@@ -81,9 +110,30 @@ const Index = () => {
               </TabsContent>
               
               <TabsContent value="hint" className="space-y-4 mt-4">
-                <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-accent transition-colors">
-                  <Music className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                  <p className="text-muted-foreground">Upload a voice hint or melody reference</p>
+                <div className="space-y-4">
+                  <Textarea 
+                    placeholder="Enter a hint or theme for AI to generate lyrics (e.g., 'A song about overcoming challenges')..."
+                    value={hint}
+                    onChange={(e) => setHint(e.target.value)}
+                    className="min-h-24"
+                  />
+                  <Button 
+                    onClick={generateLyricsAI}
+                    disabled={!hint.trim() || generatingLyrics}
+                    className="w-full bg-accent hover:bg-accent/90 text-accent-foreground"
+                  >
+                    {generatingLyrics ? (
+                      <>
+                        <Loader className="w-4 h-4 mr-2 animate-spin" />
+                        Generating Lyrics...
+                      </>
+                    ) : (
+                      <>
+                        <Zap className="w-4 h-4 mr-2" />
+                        Generate with AI
+                      </>
+                    )}
+                  </Button>
                 </div>
               </TabsContent>
               
